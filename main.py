@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import time
+from time import sleep
 
 # URLs dos temas e plugins padrão
 DEFAULT_THEME = "astra"
@@ -54,7 +54,7 @@ def create_database_with_selenium(db_name, db_user, db_password, db_user_value, 
     chrome_options.add_argument('--headless')  # Ativa o modo headless
     driver = webdriver.Chrome(options=chrome_options)
     driver.get("http://localhost/phpmyadmin")  # Abra o phpMyAdmin
-    time.sleep(5)
+    sleep(5)
 
     # Preencha as informações de login do phpMyAdmin usando XPath
     username_field = driver.find_element(By.XPATH, "//*[@id='input_username']")
@@ -64,19 +64,19 @@ def create_database_with_selenium(db_name, db_user, db_password, db_user_value, 
     password_field.send_keys(db_password_value)
     password_field.send_keys(Keys.ENTER)
 
-    time.sleep(3)
+    sleep(3)
 
     # Crie um novo banco de dados
     driver.get("http://localhost/phpmyadmin/index.php?route=/server/databases")
-    time.sleep(2)
+    sleep(2)
     new_db_name_field = driver.find_element(By.XPATH, "//*[@id='text_create_db']")
-    time.sleep(2)
+    sleep(2)
     new_db_name_field.send_keys(db_name)
-    time.sleep(1)
+    sleep(1)
     collation_select = driver.find_element(By.XPATH, "//*[@id='text_create_db']")
-    time.sleep(1)
+    sleep(1)
     collation_select.send_keys(Keys.ENTER)
-    time.sleep(1)
+    sleep(1)
     driver.quit()
 
 
@@ -86,26 +86,26 @@ def login_to_wordpress_with_selenium(site_url, project_name, wordpress_language,
     driver = webdriver.Chrome(options=chrome_options)
     driver.get(site_url)
 
-    time.sleep(4)
+    sleep(4)
     select_element = driver.find_element(By.XPATH, "//*[@id='language']")
     select_element.send_keys(wordpress_language)
     select_element.send_keys(Keys.RETURN)
 
-    time.sleep(3)
+    sleep(3)
     sitename_field = driver.find_element(By.XPATH, "//*[@id='weblog_title']")
     sitename_field.send_keys(project_name)
 
-    time.sleep(1)
+    sleep(1)
     username_field = driver.find_element(By.XPATH, "//*[@id='user_login']")
     username_field.send_keys(wordpress_username)
 
-    time.sleep(1)
+    sleep(1)
     password_field = driver.find_element(By.XPATH, "//*[@id='pass1']")
     password_field.send_keys(Keys.CONTROL + 'a')
     password_field.send_keys(Keys.DELETE)
     password_field.send_keys(wordpress_password)
 
-    time.sleep(1)
+    sleep(1)
     username_field = driver.find_element(By.XPATH, "//*[@id='admin_email']")
     username_field.send_keys(wordpress_email)
     password_field.send_keys(Keys.RETURN)
