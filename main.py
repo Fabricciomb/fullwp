@@ -6,11 +6,11 @@ from tkinter import messagebox, ttk
 import requests
 import mysql.connector
 from selenium import webdriver
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from time import sleep
-
 # URLs dos temas e plugins padrão
 DEFAULT_THEME = "astra"
 SITE_PLUGINS = {
@@ -54,7 +54,7 @@ def create_database_with_selenium(db_name, db_user, db_password, db_user_value, 
     chrome_options.add_argument('--headless')  # Ativa o modo headless
     driver = webdriver.Chrome(options=chrome_options)
     driver.get("http://localhost/phpmyadmin")  # Abra o phpMyAdmin
-    sleep(5)
+    sleep(3)
 
     # Preencha as informações de login do phpMyAdmin usando XPath
     username_field = driver.find_element(By.XPATH, "//*[@id='input_username']")
@@ -109,6 +109,7 @@ def login_to_wordpress_with_selenium(site_url, project_name, wordpress_language,
     username_field = driver.find_element(By.XPATH, "//*[@id='admin_email']")
     username_field.send_keys(wordpress_email)
     password_field.send_keys(Keys.RETURN)
+    sleep(2)
 
     driver.quit()
 def download_wordpress():
@@ -173,6 +174,7 @@ def install_plugins(plugin_urls):
     for plugin_name, plugin_url in plugin_urls.items():
         download_plugin(plugin_name, plugin_url)
         unzip_plugin(plugin_name)
+        os.remove(f"{plugin_name}.zip")
 
 def download_plugin(plugin_name, plugin_url):
     response = requests.get(plugin_url)
@@ -287,10 +289,70 @@ def createwp():
 
         messagebox.showinfo("Instalação Concluída", "O WordPress foi instalado com sucesso!")
 
+        def configurar_wp():
+            # Obtenha a URL do site da entrada de texto
+            site_url = f"http://localhost/{project_name}"
+
+            # Configurar as opções do Chrome para o modo headless (execução sem interface gráfica)
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.add_argument('--headless')
+
+            # Configurar o driver do Selenium com as opções
+            driver = webdriver.Chrome(options=chrome_options)
+
+            try:
+                # Abrir a página de login do WordPress
+                driver.get(site_url + "/wp-login.php")
+                sleep(5)
+                # Preencher informações de login
+                username_field = driver.find_element(By.ID, "user_login")
+                username_field.send_keys(wordpress_username)  # Substitua com o nome de usuário desejado
+                password_field = driver.find_element(By.ID, "user_pass")
+                password_field.send_keys(wordpress_password)  # Substitua com a senha desejada
+                password_field.send_keys(Keys.RETURN)
+                sleep(3)
+                button_custom = driver.find_element(By.XPATH, "//*[@id='menu-appearance']/a/div[2]")
+                button_custom.click()
+                sleep(3)
+                theme_child = driver.find_element(By.XPATH,
+                                                  "//*[@id='wpbody-content']/div[3]/div[4]/table/tbody/tr[2]/td[5]/a")
+                theme_child.click()
+                sleep(3)
+                button_custom = driver.find_element(By.XPATH, "//*[@id='menu-appearance']/a/div[2]")
+                button_custom.click()
+                sleep(5)
+                active_theme_astra = driver.find_element(By.XPATH, "//*[@id='wpbody-content']/div[3]/div[2]/div/div[3]")
+                active_theme_astra.click()
+                active_theme_astra = driver.find_element(By.XPATH,
+                                                         "//*[@id='wpbody-content']/div[3]/div[3]/div/div[2]/div[3]/div[2]/a[1]")
+                active_theme_astra.click()
+                active_plugins = driver.find_element(By.XPATH, "//*[@id='menu-plugins']/a/div[2]")
+                active_plugins.click()
+                active_plugins = driver.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[2]/div[1]/div[3]/form[2]/table/thead/tr/td/input")
+                active_plugins.click()
+                active_plugins = driver.find_element(By.XPATH, "//*[@id='bulk-action-selector-top']")
+                active_plugins.click()
+                select_element = Select(driver.find_element(By.XPATH, "//*[@id='bulk-action-selector-top']"))
+                select_element.select_by_visible_text('Attiva')
+                active_plugins = driver.find_element(By.XPATH, "//*[@id='doaction']")
+                active_plugins.click()
+                sleep(999)
+
+            except Exception as e:
+                # Lidar com exceções, como login malsucedido
+                print("Ocorreu um erro durante o login:", str(e))
+
+            finally:
+                # Certifique-se de sempre fechar o driver
+                driver.quit()
+
+        configurar_wp()
+
         # Captura de tela com mensagem de sucesso
         root.update_idletasks()
         root.withdraw()  # Ocultar a janela principal temporariamente
-        time.sleep(2)  # Esperar para garantir que a janela de mensagem seja exibida
+        sleep(2)  # Esperar para garantir que a janela de mensagem seja exibida
+
 
     root = tk.Tk()
     root.title("Instalador WordPress")
