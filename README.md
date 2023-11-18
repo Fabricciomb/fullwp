@@ -2,7 +2,7 @@
 
 ## 1. Clone the `wplocal` repository into the "www" folder of your Apache server:
 
-git clone https://github.com/your-username/wplocal.git /path/to/www/
+git clone https://github.com/fabricciomb/wplocal.git /path/to/www/
 
 ## 2. Navigate to the `wplocal` directory:
 
